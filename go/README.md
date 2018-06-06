@@ -32,10 +32,19 @@ To run the example just execute this command in the _go_ directory :
 
 `$ go run main.go`
 
-Then access the example in the browser in `http://localhost:/8888`
+The endpoints available are :
+
+- **GET** /login - redirects to the ContaAzul authorization page
+- **GET** /callback - the callback of the login
+- **GET** /refresh_token - refresh the token
+- **GET** /list_products - list all products with pagination
+- **GET** /delete_product - delete a product by id
+
+This example doesn't have frontend example yet.
 
 ## Dependencies
 
 This example uses some dependencies to assist some steps :
 
   - [gorilla/mux](https://github.com/gorilla/mux) : provide routing for go
+  - [apex/log](https://github.com/apex/log) : provide a better logging for go
