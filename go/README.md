@@ -8,8 +8,7 @@ You'll need to install the [Dep](https://github.com/golang/dep) as well.
 With Go and Dep installed, clone this repository, navigate to the _go_ directory and run :
 
 ```
-  $ go get
-  $ dep ensure
+  $ go get -v github.com/golang/dep/... && dep ensure
 ```
 
 This command will download all the dependencies required by this example.

@@ -22,12 +22,12 @@ func List() http.HandlerFunc {
 			return
 		}
 
-		var parameter struct {
+		var parameters struct {
 			AccessToken string `json:"access_token"`
 			Page        string `json:"page"`
 			Size        string `json:"size"`
 		}
-		err = json.Unmarshal(bodyBytes, &parameter)
+		err = json.Unmarshal(bodyBytes, &parameters)
 		if err != nil {
 			log.WithError(err).Error("cannot unmarshal request parameters")
 			http.Redirect(w, r, fmt.Sprintf("/#?error=%s", "'cannot unmarshal request parameters'"), 400)
@@ -35,13 +35,13 @@ func List() http.HandlerFunc {
 		}
 
 		var APIURL = "https://api.contaazul.com/v1/products?page=%s&size=%s"
-		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf(APIURL, parameter.Page, parameter.Size), nil)
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf(APIURL, parameters.Page, parameters.Size), nil)
 		if err != nil {
 			log.WithError(err).Error("cannot create request")
 			http.Redirect(w, r, fmt.Sprintf("/#?error=%s", "'cannot create request'"), 400)
 			return
 		}
-		req.Header.Set("Authorization", "Bearer "+parameter.AccessToken)
+		req.Header.Set("Authorization", "Bearer "+parameters.AccessToken)
 
 		client := &http.Client{Timeout: time.Second * 2}
 		resp, err := client.Do(req)
@@ -73,11 +73,11 @@ func Delete() http.HandlerFunc {
 			return
 		}
 
-		var parameter struct {
+		var parameters struct {
 			AccessToken string `json:"access_token"`
 			ID          string `json:"id"`
 		}
-		err = json.Unmarshal(bodyBytes, &parameter)
+		err = json.Unmarshal(bodyBytes, &parameters)
 		if err != nil {
 			log.WithError(err).Error("cannot unmarshal request parameters")
 			http.Redirect(w, r, fmt.Sprintf("/#?error=%s", "'cannot unmarshal request parameters'"), 400)
@@ -85,13 +85,13 @@ func Delete() http.HandlerFunc {
 		}
 
 		var APIURL = "https://api.contaazul.com/v1/products/%s"
-		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf(APIURL, parameter.ID), nil)
+		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf(APIURL, parameters.ID), nil)
 		if err != nil {
 			log.WithError(err).Error("cannot create request")
 			http.Redirect(w, r, fmt.Sprintf("/#?error=%s", "'cannot create request'"), 400)
 			return
 		}
-		req.Header.Set("Authorization", "Bearer "+parameter.AccessToken)
+		req.Header.Set("Authorization", "Bearer "+parameters.AccessToken)
 
 		client := &http.Client{Timeout: time.Second * 2}
 		resp, err := client.Do(req)

@@ -1,5 +1,6 @@
 package auth
 
+// Refresh the token
 import (
 	"bytes"
 	b64 "encoding/base64"
@@ -12,26 +13,9 @@ import (
 	"github.com/apex/log"
 )
 
-// Authorize the application
-func Authorize(clientID string, redirectURI string) http.HandlerFunc {
+// Refresh the token authorization
+func Refresh(clientID string, clientSecret string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		//must generate a state string and store in cookies or something
-		var state = "some-generated-state"
-
-		// your application requests authorization
-		var scope = "sales"
-		var URL = "https://api.contaazul.com/auth/authorize?client_id=%s&scope=%s&redirect_uri=%s&state=%s"
-
-		http.Redirect(w, r, fmt.Sprintf(URL, clientID, scope, redirectURI, state), 200)
-	}
-}
-
-// Callback of the authorization
-func Callback(clientID string, clientSecret string, redirectURI string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-
-		// must get state from stored cookies or something
-		var storedState = "some-generated-state"
 
 		defer r.Body.Close() // nolint: errcheck
 		bodyBytes, err := ioutil.ReadAll(r.Body)
@@ -42,25 +26,18 @@ func Callback(clientID string, clientSecret string, redirectURI string) http.Han
 		}
 
 		var parameters struct {
-			Code  string `json:"code"`
-			State string `json:"state"`
+			RefreshToken string `json:"refresh_token"`
+			GrantType    string `json:"grant_type"`
 		}
 		err = json.Unmarshal(bodyBytes, &parameters)
-		if err != nil || parameters.State != storedState {
+		if err != nil {
 			log.WithError(err).Error("cannot unmarshal request parameters")
 			http.Redirect(w, r, fmt.Sprintf("/#?error=%s", "'cannot unmarshal request parameters'"), 400)
 			return
 		}
 
-		var form struct {
-			Code        string `json:"code"`
-			RedirectURI string `json:"redirect_uri"`
-			GrantType   string `json:"grant_type"`
-		}
-		form.Code = parameters.Code
-		form.RedirectURI = redirectURI
-		form.GrantType = "authorization_code"
-		redirectForm, err := json.Marshal(form)
+		parameters.GrantType = "refresh_token"
+		redirectForm, err := json.Marshal(parameters)
 		if nil != err {
 			log.WithError(err).Error("cannot marshal form")
 			http.Redirect(w, r, fmt.Sprintf("/#?error=%s", "'cannot marshal form'"), 400)
@@ -81,13 +58,14 @@ func Callback(clientID string, clientSecret string, redirectURI string) http.Han
 		client := &http.Client{Timeout: time.Second * 2}
 		resp, err := client.Do(req)
 		if err != nil {
-			log.WithError(err).Error("cannot post to authorize")
-			http.Redirect(w, r, fmt.Sprintf("/#?error=%s", "'cannot post to authorize'"), 400)
+			log.WithError(err).Error("cannot post to refresh token")
+			http.Redirect(w, r, fmt.Sprintf("/#?error=%s", "'cannot post to refresh token'"), 400)
 			return
 		}
 
 		if resp.StatusCode != 200 {
-			http.Redirect(w, r, fmt.Sprintf("/#?error=%s", "'invalid_token'"), 400)
+			log.Error("cannot refresh token")
+			http.Redirect(w, r, fmt.Sprintf("/#?error=%s", "'cannot refresh token'"), 400)
 			return
 		}
 
@@ -109,7 +87,7 @@ func Callback(clientID string, clientSecret string, redirectURI string) http.Han
 			http.Redirect(w, r, fmt.Sprintf("/#?error=%s", "'cannot unmarshal response parameters'"), 400)
 			return
 		}
-		// we can also pass the token to the browser to make requests from there
 		http.Redirect(w, r, fmt.Sprintf("#?access_token=%s&refresh_token=%s", response.AccessToken, response.RefreshToken), 200)
+
 	}
 }
