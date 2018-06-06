@@ -1,2 +1,4 @@
 node/node_modules/
 **/.mvn
+go/vendor/
+go/go
