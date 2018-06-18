@@ -74,9 +74,10 @@ func Callback(clientID string, clientSecret string, redirectURI string) http.Han
 			return
 		}
 
-		var data = clientID + clientSecret
+		var data = clientID + ":" + clientSecret
 		dataEncoded := b64.StdEncoding.EncodeToString([]byte(data))
 		req.Header.Set("Authorization", "Basic "+dataEncoded)
+		req.Header.Set("Content-Type", "application/json")
 
 		client := &http.Client{Timeout: time.Second * 2}
 		resp, err := client.Do(req)
