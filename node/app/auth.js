@@ -1,6 +1,6 @@
-var client_id = 'CLIENT_ID'; // Your client id
-var client_secret = 'CLIENT_SECRET'; // Your secret
-var redirect_uri = 'REDIRECT_URI'; // Your redirect uri
+var client_id = 'PlOmbkCV0lGnno35XRf24UdwElaijjrg'; // Your client id
+var client_secret = 'ePwpEoNaReD0CUVsfoXFRkS9MVoRqAQg'; // Your secret
+var redirect_uri = 'https://contaazulapp.herokuapp.com/'; // Your redirect uri
 
 var stateKey = 'contaazul_auth_state';
 
